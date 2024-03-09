@@ -1,0 +1,27 @@
+
+- name: Deploy war file on Tomcat
+  hosts: webserver
+  become: true
+  become_user: root
+  tasks:
+    - name: Install package tomcat on server
+      package: name=tomcat state=present
+    - name: Start Tomcat Server
+      service: name=tomcat state=started
+    - name: Install package Maven on server
+      package: 
+        name : maven
+        state : present
+    - name: Deploy WAR file on tomcat server
+      get_url:
+       url=https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war
+       dest=/usr/share/tomcat/webapps
+      notify:
+        - Restart tomcat
+        - Print deployment message
+  handlers:
+   - name: Print deployment message
+     debug:
+       msg: "Deployment complete"
+   - name: Restart tomcat server
+     service: name=tomcat state=restarted
